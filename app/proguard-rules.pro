@@ -26,6 +26,18 @@
 -keep class io.github.rosemoe.sora.** { *; }
 -keep class org.eclipse.tm4e.** { *; }
 
+# Preservar las clases DefaultImpls generadas por Kotlin para interfaces
+# Sora Editor usa ShareableData que hereda de Cloneable con implementaciones por defecto
+-keep class kotlin.Cloneable$DefaultImpls { *; }
+-keep class io.github.rosemoe.sora.util.ShareableData$DefaultImpls { *; }
+-keep interface io.github.rosemoe.sora.util.ShareableData { *; }
+
+# Preservar cualquier clase que implemente Cloneable (necesario para el clone() en DefaultImpls)
+-keep class * implements kotlin.Cloneable { *; }
+
+# Preservar todas las clases DefaultImpls de Kotlin (generadas para interfaces con métodos por defecto)
+-keep class **$DefaultImpls { *; }
+
 # ==========================================
 # Reglas para Zip4j
 # ==========================================
