@@ -1,6 +1,16 @@
 <resources>
     <string name="app_name">TwedMark</string>
     
+    <!-- Main Screen -->
+    <string name="main_welcome">Bienvenido a TwedMark</string>
+    <string name="main_view_crash_logs">Ver registros de errores</string>
+    <string name="main_view_debug_paths">Ver rutas de depuración</string>
+    
+    <!-- Debug Paths Screen -->
+    <string name="debug_paths_title">Rutas de depuración</string>
+    <string name="debug_paths_back">Atrás</string>
+    <string name="debug_paths_placeholder">Pantalla de depuración (implementación en Paso 0.10)</string>
+    
     <!-- Crash Log Screen -->
     <string name="crash_log_title">Registros de errores</string>
     <string name="crash_log_empty">No hay registros de errores</string>
