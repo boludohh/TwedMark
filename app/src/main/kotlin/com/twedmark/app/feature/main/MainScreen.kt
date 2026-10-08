@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.dp
 import com.twedmark.app.BuildConfig
 import com.twedmark.app.R
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     onNavigateToCrashLog: () -> Unit,

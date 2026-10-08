@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
@@ -44,13 +45,19 @@ fun CrashLogScreen(
                 title = { Text(stringResource(R.string.crash_log_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Text("←")
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_arrow_back),
+                            contentDescription = stringResource(R.string.crash_log_back)
+                        )
                     }
                 },
                 actions = {
                     if (logs.isNotEmpty()) {
                         IconButton(onClick = viewModel::deleteAll) {
-                            Text("🗑")
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_delete_filled),
+                                contentDescription = stringResource(R.string.crash_log_delete_all)
+                            )
                         }
                     }
                 }
@@ -159,15 +166,33 @@ private fun CrashLogDetailDialog(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 TextButton(onClick = onCopy) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_content_copy_outline),
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
                     Text(stringResource(R.string.crash_log_copy))
                 }
                 TextButton(onClick = onShare) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_share_filled),
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
                     Text(stringResource(R.string.crash_log_share))
                 }
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_close),
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
                 Text(stringResource(R.string.crash_log_close))
             }
         }
