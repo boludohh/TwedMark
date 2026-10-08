@@ -16,33 +16,33 @@ class WorkspaceManager(private val fs: FileSystem, baseDir: Path) {
     val trashDir: Path = internalDir / "trash"
     val snapshotsDir: Path = internalDir / "snapshots"
     
-    private val _structureRestored = MutableSharedFlow<Unit>()
+    private val _structureRestored = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val structureRestored: SharedFlow<Unit> = _structureRestored.asSharedFlow()
     
     fun ensureStructure() {
-        // TODO: Implementación completa en Paso 0.5
-        // Por ahora solo crea las carpetas básicas
-        try {
-            if (!fs.exists(workspaceRoot)) {
-                fs.createDirectories(workspaceRoot)
-            }
-            if (!fs.exists(assetsDir)) {
-                fs.createDirectories(assetsDir)
-            }
-            if (!fs.exists(internalDir)) {
-                fs.createDirectories(internalDir)
-            }
-            if (!fs.exists(crashDir)) {
-                fs.createDirectories(crashDir)
-            }
-            if (!fs.exists(trashDir)) {
-                fs.createDirectories(trashDir)
-            }
-            if (!fs.exists(snapshotsDir)) {
-                fs.createDirectories(snapshotsDir)
-            }
-        } catch (e: Exception) {
-            // Silenciar errores por ahora
+        var created = false
+        if (!fs.exists(workspaceRoot)) {
+            fs.createDirectories(workspaceRoot)
+            created = true
+        }
+        if (!fs.exists(assetsDir)) {
+            fs.createDirectories(assetsDir)
+            created = true
+        }
+        if (!fs.exists(internalDir)) {
+            fs.createDirectories(internalDir)
+        }
+        if (!fs.exists(crashDir)) {
+            fs.createDirectories(crashDir)
+        }
+        if (!fs.exists(trashDir)) {
+            fs.createDirectories(trashDir)
+        }
+        if (!fs.exists(snapshotsDir)) {
+            fs.createDirectories(snapshotsDir)
+        }
+        if (created) {
+            _structureRestored.tryEmit(Unit)
         }
     }
     
@@ -51,8 +51,13 @@ class WorkspaceManager(private val fs: FileSystem, baseDir: Path) {
     }
     
     fun requireInsideWorkspace(path: Path): Outcome<Path> {
-        // TODO: Implementación completa en Paso 0.5
-        return Outcome.Success(path)
+        val normalized = path.normalized()
+        val root = workspaceRoot.normalized()
+        return if (normalized.toString().startsWith(root.toString())) {
+            Outcome.Success(normalized)
+        } else {
+            Outcome.Failure(AppError.OutsideWorkspace)
+        }
     }
     
     fun checkMutable(path: Path): Outcome<Unit> {

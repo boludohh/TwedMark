@@ -6,6 +6,7 @@ import com.twedmark.app.app.di.editorModule
 import com.twedmark.app.app.di.explorerModule
 import com.twedmark.app.core.common.ApplicationScope
 import com.twedmark.app.core.file.WorkspaceManager
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
@@ -26,6 +27,8 @@ class TwedMarkApp : Application() {
         }
         
         // Ejecutar ensureStructure en el scope de aplicación
-        workspaceManager.ensureStructure()
+        applicationScope.scope.launch {
+            workspaceManager.ensureStructure()
+        }
     }
 }
