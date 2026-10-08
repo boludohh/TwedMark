@@ -83,3 +83,19 @@ jobs:
           path: app/build/outputs/mapping/release/
           if-no-files-found: warn
           retention-days: 30
+
+      - name: Subir reportes de problemas de Gradle
+        uses: actions/upload-artifact@v6
+        with:
+          name: TwedMark-gradle-problems-reports
+          path: build/reports/problems/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Subir missing_rules.txt de R8 (si existe)
+        uses: actions/upload-artifact@v6
+        with:
+          name: TwedMark-R8-missing-rules
+          path: app/build/outputs/mapping/release/missing_rules.txt
+          if-no-files-found: warn
+          retention-days: 30
