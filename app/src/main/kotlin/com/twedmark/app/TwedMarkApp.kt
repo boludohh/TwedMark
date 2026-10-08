@@ -19,7 +19,7 @@ class TwedMarkApp : Application() {
     override fun onCreate() {
         super.onCreate()
         
-        // TODO: CrashHandler.install(filesDir) se añadirá en el Paso 0.8
+        CrashHandler.install(filesDir)
         
         startKoin {
             androidContext(this@TwedMarkApp)
