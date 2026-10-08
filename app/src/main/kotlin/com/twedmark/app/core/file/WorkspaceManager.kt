@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import okio.FileSystem
 import okio.Path
+import java.util.concurrent.atomic.AtomicBoolean
 
 class WorkspaceManager(private val fs: FileSystem, baseDir: Path) {
     val workspaceRoot: Path = baseDir / "workspace"
@@ -18,6 +19,8 @@ class WorkspaceManager(private val fs: FileSystem, baseDir: Path) {
     
     private val _structureRestored = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val structureRestored: SharedFlow<Unit> = _structureRestored.asSharedFlow()
+    
+    private val tmpCleanupDone = AtomicBoolean(false)
     
     fun ensureStructure() {
         var created = false
@@ -41,6 +44,15 @@ class WorkspaceManager(private val fs: FileSystem, baseDir: Path) {
         if (!fs.exists(snapshotsDir)) {
             fs.createDirectories(snapshotsDir)
         }
+        
+        // Al arrancar también elimina los *.tmp huérfanos del workspace
+        // (restos de una escritura interrumpida). Solo se ejecuta una vez.
+        if (tmpCleanupDone.compareAndSet(false, true) && fs.exists(workspaceRoot)) {
+            runCatching {
+                cleanOrphanTmpFiles(workspaceRoot)
+            }
+        }
+        
         if (created) {
             _structureRestored.tryEmit(Unit)
         }
@@ -65,6 +77,18 @@ class WorkspaceManager(private val fs: FileSystem, baseDir: Path) {
             Outcome.Failure(AppError.ProtectedPath)
         } else {
             Outcome.Success(Unit)
+        }
+    }
+    
+    private fun cleanOrphanTmpFiles(dir: Path) {
+        val children = runCatching { fs.list(dir) }.getOrDefault(emptyList())
+        for (child in children) {
+            val metadata = fs.metadataOrNull(child)
+            if (metadata?.isDirectory == true) {
+                cleanOrphanTmpFiles(child)
+            } else if (child.name.endsWith(".tmp")) {
+                runCatching { fs.delete(child) }
+            }
         }
     }
 }

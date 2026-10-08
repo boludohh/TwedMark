@@ -22,8 +22,8 @@ android {
         applicationId = "com.twedmark.app"
         minSdk = 27
         targetSdk = 37
-        versionCode = 8
-        versionName = "0.6.0"
+        versionCode = 9
+        versionName = "0.7.0"
     }
 
     splits {
