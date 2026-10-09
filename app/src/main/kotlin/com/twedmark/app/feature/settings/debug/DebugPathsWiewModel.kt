@@ -10,7 +10,6 @@ import com.twedmark.app.core.file.AtomicFileWriter
 import com.twedmark.app.core.file.LineEnding
 import com.twedmark.app.core.file.MarkdownPath
 import com.twedmark.app.core.file.NameSanitizer
-import com.twedmark.app.core.file.NodeKind
 import com.twedmark.app.core.file.NoteContent
 import com.twedmark.app.core.file.NoteIO
 import com.twedmark.app.core.file.WorkspaceManager
@@ -39,7 +38,7 @@ class DebugPathsViewModel(
 
     data class DebugCase(
         val name: String,
-        val run: (Path) -> String?
+        val run: suspend (Path) -> String?
     )
 
     private val cases: List<DebugCase> = buildCases()
@@ -60,7 +59,7 @@ class DebugPathsViewModel(
         if (_isRunning.value) return
         viewModelScope.launch(dispatchers.io) {
             _isRunning.value = true
-            val tempBase = appContext.cacheDir.toPath() / "debug-paths" / System.currentTimeMillis().toString()
+            val tempBase = appContext.cacheDir.toPath() / "debug-paths" / "${System.currentTimeMillis()}"
             try {
                 fs.createDirectories(tempBase)
                 for (case in cases) {
@@ -88,9 +87,10 @@ class DebugPathsViewModel(
         noteIOCases() +
         treeCases()
 
-    private fun case(name: String, block: (Path) -> String?): DebugCase {
+    private fun case(name: String, block: suspend (Path) -> String?): DebugCase {
         return DebugCase(name) { tempBase ->
-            val caseBase = tempBase / name.replace(Regex("[^A-Za-z0-9_-]"), "_")
+            val safeName = name.replace(Regex("[^A-Za-z0-9_-]"), "_")
+            val caseBase = tempBase / safeName
             if (fs.exists(caseBase)) fs.deleteRecursively(caseBase)
             fs.createDirectories(caseBase)
             try {
@@ -417,12 +417,12 @@ class DebugPathsViewModel(
             val repo = WorkspaceRepository(fs, wm, dispatchers)
             repo.refreshAll()
             val tree = repo.tree.value
-            val assetsNode = tree.find { it.path == wm.assetsDir }
+            val assetsNode = tree.find { node -> node.path == wm.assetsDir }
             if (assetsNode?.isProtected != true) return@case "assets no tiene isProtected=true"
-            val rootIndex = tree.indexOfFirst { it.path == wm.workspaceRoot }
-            val diarioIndex = tree.indexOfFirst { it.name == "Diario.md" }
-            val viajeIndex = tree.indexOfFirst { it.name == "viaje" }
-            val assetsIndex = tree.indexOfFirst { it.name == "assets" }
+            val rootIndex = tree.indexOfFirst { node -> node.path == wm.workspaceRoot }
+            val diarioIndex = tree.indexOfFirst { node -> node.name == "Diario.md" }
+            val viajeIndex = tree.indexOfFirst { node -> node.name == "viaje" }
+            val assetsIndex = tree.indexOfFirst { node -> node.name == "assets" }
             if (rootIndex < 0 || diarioIndex < 0 || viajeIndex < 0 || assetsIndex < 0) {
                 return@case "No se encontraron todos los nodos"
             }
@@ -441,9 +441,9 @@ class DebugPathsViewModel(
             repo.refreshAll()
             repo.toggleExpanded(wm.workspaceRoot / "viaje")
             val tree = repo.tree.value
-            val notasIndex = tree.indexOfFirst { it.name == "notas.md" }
-            val fotoIndex = tree.indexOfFirst { it.name == "foto.png" }
-            val viajeIndex = tree.indexOfFirst { it.name == "viaje" }
+            val notasIndex = tree.indexOfFirst { node -> node.name == "notas.md" }
+            val fotoIndex = tree.indexOfFirst { node -> node.name == "foto.png" }
+            val viajeIndex = tree.indexOfFirst { node -> node.name == "viaje" }
             if (notasIndex < 0 || fotoIndex < 0) return@case "Hijos de viaje no aparecen"
             if (notasIndex <= viajeIndex || fotoIndex <= viajeIndex) {
                 return@case "Hijos no están después de viaje"
