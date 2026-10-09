@@ -59,9 +59,9 @@ class DebugPathsViewModel(
         if (_isRunning.value) return
         viewModelScope.launch(dispatchers.io) {
             _isRunning.value = true
-            val baseDir = appContext.cacheDir.toPath()
+            val baseDir = appContext.cacheDir.absolutePath.toPath()
             val debugDir = baseDir / "debug-paths"
-            val tempBase = debugDir.div(System.currentTimeMillis().toString())
+            val tempBase = debugDir / System.currentTimeMillis().toString()
             try {
                 fs.createDirectories(tempBase)
                 for (case in cases) {
