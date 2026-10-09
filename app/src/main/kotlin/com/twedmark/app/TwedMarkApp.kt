@@ -3,6 +3,7 @@ package com.twedmark.app
 import android.app.Application
 import com.twedmark.app.app.di.coreModule
 import com.twedmark.app.app.di.crashModule
+import com.twedmark.app.app.di.debugModule
 import com.twedmark.app.app.di.editorModule
 import com.twedmark.app.app.di.explorerModule
 import com.twedmark.app.core.common.ApplicationScope
@@ -28,7 +29,8 @@ class TwedMarkApp : Application() {
                 coreModule,
                 explorerModule,
                 editorModule,
-                crashModule
+                crashModule,
+                debugModule
             )
         }
         
