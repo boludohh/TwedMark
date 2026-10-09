@@ -1,7 +1,9 @@
 package com.twedmark.app.app.di
 
+import com.twedmark.app.feature.editor.domain.DocumentSaver
 import org.koin.dsl.module
 
 val editorModule = module {
-    // TODO: Esqueleto con scope ligado a la vista se añadirá en pasos posteriores
+    // Factory: se crea una nueva instancia por cada EditorViewModel
+    factory { DocumentSaver(get(), get()) }
 }
