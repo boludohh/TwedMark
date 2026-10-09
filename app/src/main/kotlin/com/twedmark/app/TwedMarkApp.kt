@@ -2,6 +2,7 @@ package com.twedmark.app
 
 import android.app.Application
 import com.twedmark.app.app.di.coreModule
+import com.twedmark.app.app.di.crashModule
 import com.twedmark.app.app.di.editorModule
 import com.twedmark.app.app.di.explorerModule
 import com.twedmark.app.core.common.ApplicationScope
@@ -23,7 +24,12 @@ class TwedMarkApp : Application() {
         
         startKoin {
             androidContext(this@TwedMarkApp)
-            modules(coreModule, explorerModule, editorModule)
+            modules(
+                coreModule,
+                explorerModule,
+                editorModule,
+                crashModule
+            )
         }
         
         // Ejecutar ensureStructure en el scope de aplicación
