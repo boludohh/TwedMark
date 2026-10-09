@@ -3,130 +3,131 @@ package com.twedmark.app.ui.theme
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.FontFamily
 import androidx.compose.ui.text.FontWeight
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.unit.sp
+import com.twedmark.app.R
 
 // Definición de la familia tipográfica IBM Plex Sans
 private val IbmPlexSans = FontFamily(
-    Font(resId = com.twedmark.app.R.font.ibmplexsans_text, weight = FontWeight.Light),
-    Font(resId = com.twedmark.app.R.font.ibmplexsans_text_italic, weight = FontWeight.Light, style = androidx.compose.ui.text.font.FontStyle.Italic),
-    Font(resId = com.twedmark.app.R.font.ibmplexsans_regular, weight = FontWeight.Normal),
-    Font(resId = com.twedmark.app.R.font.ibmplexsans_regular_italic, weight = FontWeight.Normal, style = androidx.compose.ui.text.font.FontStyle.Italic),
-    Font(resId = com.twedmark.app.R.font.ibmplexsans_medium, weight = FontWeight.Medium),
-    Font(resId = com.twedmark.app.R.font.ibmplexsans_medium_italic, weight = FontWeight.Medium, style = androidx.compose.ui.text.font.FontStyle.Italic),
-    Font(resId = com.twedmark.app.R.font.ibmplexsans_semibold, weight = FontWeight.SemiBold),
-    Font(resId = com.twedmark.app.R.font.ibmplexsans_semibold_italic, weight = FontWeight.SemiBold, style = androidx.compose.ui.text.font.FontStyle.Italic),
-    Font(resId = com.twedmark.app.R.font.ibmplexsans_bold, weight = FontWeight.Bold),
-    Font(resId = com.twedmark.app.R.font.ibmplexsans_bold_italic, weight = FontWeight.Bold, style = androidx.compose.ui.text.font.FontStyle.Italic)
+    Font(resId = R.font.ibmplexsans_text, weight = FontWeight.Light),
+    Font(resId = R.font.ibmplexsans_text_italic, weight = FontWeight.Light, style = FontStyle.Italic),
+    Font(resId = R.font.ibmplexsans_regular, weight = FontWeight.Normal),
+    Font(resId = R.font.ibmplexsans_regular_italic, weight = FontWeight.Normal, style = FontStyle.Italic),
+    Font(resId = R.font.ibmplexsans_medium, weight = FontWeight.Medium),
+    Font(resId = R.font.ibmplexsans_medium_italic, weight = FontWeight.Medium, style = FontStyle.Italic),
+    Font(resId = R.font.ibmplexsans_semibold, weight = FontWeight.SemiBold),
+    Font(resId = R.font.ibmplexsans_semibold_italic, weight = FontWeight.SemiBold, style = FontStyle.Italic),
+    Font(resId = R.font.ibmplexsans_bold, weight = FontWeight.Bold),
+    Font(resId = R.font.ibmplexsans_bold_italic, weight = FontWeight.Bold, style = FontStyle.Italic)
 )
 
 // Tipografía personalizada usando IBM Plex Sans
 val AppTypography = Typography(
-    displayLarge = androidx.compose.ui.text.TextStyle(
+    displayLarge = TextStyle(
         fontFamily = IbmPlexSans,
         fontWeight = FontWeight.Light,
-        fontSize = androidx.compose.ui.unit.sp(57.sp),
-        lineHeight = androidx.compose.ui.unit.sp(64.sp),
-        letterSpacing = androidx.compose.ui.unit.sp((-0.25).sp)
+        fontSize = 57.sp,
+        lineHeight = 64.sp,
+        letterSpacing = (-0.25).sp
     ),
-    displayMedium = androidx.compose.ui.text.TextStyle(
+    displayMedium = TextStyle(
         fontFamily = IbmPlexSans,
         fontWeight = FontWeight.Light,
-        fontSize = androidx.compose.ui.unit.sp(45.sp),
-        lineHeight = androidx.compose.ui.unit.sp(52.sp),
-        letterSpacing = androidx.compose.ui.unit.sp(0.sp)
+        fontSize = 45.sp,
+        lineHeight = 52.sp,
+        letterSpacing = 0.sp
     ),
-    displaySmall = androidx.compose.ui.text.TextStyle(
+    displaySmall = TextStyle(
         fontFamily = IbmPlexSans,
         fontWeight = FontWeight.Normal,
-        fontSize = androidx.compose.ui.unit.sp(36.sp),
-        lineHeight = androidx.compose.ui.unit.sp(44.sp),
-        letterSpacing = androidx.compose.ui.unit.sp(0.sp)
+        fontSize = 36.sp,
+        lineHeight = 44.sp,
+        letterSpacing = 0.sp
     ),
-    headlineLarge = androidx.compose.ui.text.TextStyle(
+    headlineLarge = TextStyle(
         fontFamily = IbmPlexSans,
         fontWeight = FontWeight.SemiBold,
-        fontSize = androidx.compose.ui.unit.sp(32.sp),
-        lineHeight = androidx.compose.ui.unit.sp(40.sp),
-        letterSpacing = androidx.compose.ui.unit.sp(0.sp)
+        fontSize = 32.sp,
+        lineHeight = 40.sp,
+        letterSpacing = 0.sp
     ),
-    headlineMedium = androidx.compose.ui.text.TextStyle(
+    headlineMedium = TextStyle(
         fontFamily = IbmPlexSans,
         fontWeight = FontWeight.SemiBold,
-        fontSize = androidx.compose.ui.unit.sp(28.sp),
-        lineHeight = androidx.compose.ui.unit.sp(36.sp),
-        letterSpacing = androidx.compose.ui.unit.sp(0.sp)
+        fontSize = 28.sp,
+        lineHeight = 36.sp,
+        letterSpacing = 0.sp
     ),
-    headlineSmall = androidx.compose.ui.text.TextStyle(
+    headlineSmall = TextStyle(
         fontFamily = IbmPlexSans,
         fontWeight = FontWeight.SemiBold,
-        fontSize = androidx.compose.ui.unit.sp(24.sp),
-        lineHeight = androidx.compose.ui.unit.sp(32.sp),
-        letterSpacing = androidx.compose.ui.unit.sp(0.sp)
+        fontSize = 24.sp,
+        lineHeight = 32.sp,
+        letterSpacing = 0.sp
     ),
-    titleLarge = androidx.compose.ui.text.TextStyle(
+    titleLarge = TextStyle(
         fontFamily = IbmPlexSans,
         fontWeight = FontWeight.SemiBold,
-        fontSize = androidx.compose.ui.unit.sp(22.sp),
-        lineHeight = androidx.compose.ui.unit.sp(28.sp),
-        letterSpacing = androidx.compose.ui.unit.sp(0.sp)
+        fontSize = 22.sp,
+        lineHeight = 28.sp,
+        letterSpacing = 0.sp
     ),
-    titleMedium = androidx.compose.ui.text.TextStyle(
+    titleMedium = TextStyle(
         fontFamily = IbmPlexSans,
         fontWeight = FontWeight.SemiBold,
-        fontSize = androidx.compose.ui.unit.sp(16.sp),
-        lineHeight = androidx.compose.ui.unit.sp(24.sp),
-        letterSpacing = androidx.compose.ui.unit.sp(0.15.sp)
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+        letterSpacing = 0.15.sp
     ),
-    titleSmall = androidx.compose.ui.text.TextStyle(
+    titleSmall = TextStyle(
         fontFamily = IbmPlexSans,
         fontWeight = FontWeight.Medium,
-        fontSize = androidx.compose.ui.unit.sp(14.sp),
-        lineHeight = androidx.compose.ui.unit.sp(20.sp),
-        letterSpacing = androidx.compose.ui.unit.sp(0.1.sp)
+        fontSize = 14.sp,
+        lineHeight = 20.sp,
+        letterSpacing = 0.1.sp
     ),
-    bodyLarge = androidx.compose.ui.text.TextStyle(
+    bodyLarge = TextStyle(
         fontFamily = IbmPlexSans,
         fontWeight = FontWeight.Normal,
-        fontSize = androidx.compose.ui.unit.sp(16.sp),
-        lineHeight = androidx.compose.ui.unit.sp(24.sp),
-        letterSpacing = androidx.compose.ui.unit.sp(0.5.sp)
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+        letterSpacing = 0.5.sp
     ),
-    bodyMedium = androidx.compose.ui.text.TextStyle(
+    bodyMedium = TextStyle(
         fontFamily = IbmPlexSans,
         fontWeight = FontWeight.Normal,
-        fontSize = androidx.compose.ui.unit.sp(14.sp),
-        lineHeight = androidx.compose.ui.unit.sp(20.sp),
-        letterSpacing = androidx.compose.ui.unit.sp(0.25.sp)
+        fontSize = 14.sp,
+        lineHeight = 20.sp,
+        letterSpacing = 0.25.sp
     ),
-    bodySmall = androidx.compose.ui.text.TextStyle(
+    bodySmall = TextStyle(
         fontFamily = IbmPlexSans,
         fontWeight = FontWeight.Normal,
-        fontSize = androidx.compose.ui.unit.sp(12.sp),
-        lineHeight = androidx.compose.ui.unit.sp(16.sp),
-        letterSpacing = androidx.compose.ui.unit.sp(0.4.sp)
+        fontSize = 12.sp,
+        lineHeight = 16.sp,
+        letterSpacing = 0.4.sp
     ),
-    labelLarge = androidx.compose.ui.text.TextStyle(
+    labelLarge = TextStyle(
         fontFamily = IbmPlexSans,
         fontWeight = FontWeight.Medium,
-        fontSize = androidx.compose.ui.unit.sp(14.sp),
-        lineHeight = androidx.compose.ui.unit.sp(20.sp),
-        letterSpacing = androidx.compose.ui.unit.sp(0.1.sp)
+        fontSize = 14.sp,
+        lineHeight = 20.sp,
+        letterSpacing = 0.1.sp
     ),
-    labelMedium = androidx.compose.ui.text.TextStyle(
+    labelMedium = TextStyle(
         fontFamily = IbmPlexSans,
         fontWeight = FontWeight.Medium,
-        fontSize = androidx.compose.ui.unit.sp(12.sp),
-        lineHeight = androidx.compose.ui.unit.sp(16.sp),
-        letterSpacing = androidx.compose.ui.unit.sp(0.5.sp)
+        fontSize = 12.sp,
+        lineHeight = 16.sp,
+        letterSpacing = 0.5.sp
     ),
-    labelSmall = androidx.compose.ui.text.TextStyle(
+    labelSmall = TextStyle(
         fontFamily = IbmPlexSans,
         fontWeight = FontWeight.Medium,
-        fontSize = androidx.compose.ui.unit.sp(11.sp),
-        lineHeight = androidx.compose.ui.unit.sp(16.sp),
-        letterSpacing = androidx.compose.ui.unit.sp(0.5.sp)
+        fontSize = 11.sp,
+        lineHeight = 16.sp,
+        letterSpacing = 0.5.sp
     )
 )
-
-// Extensión para usar sp directamente
-private val Int.sp get() = androidx.compose.ui.unit.sp
