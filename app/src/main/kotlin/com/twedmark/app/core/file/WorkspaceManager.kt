@@ -65,11 +65,23 @@ class WorkspaceManager(private val fs: FileSystem, baseDir: Path) {
     fun requireInsideWorkspace(path: Path): Outcome<Path> {
         val normalized = path.normalized()
         val root = workspaceRoot.normalized()
-        return if (normalized.toString().startsWith(root.toString())) {
-            Outcome.Success(normalized)
-        } else {
-            Outcome.Failure(AppError.OutsideWorkspace)
+        
+        if (normalized == root) return Outcome.Success(normalized)
+        
+        val rootSegments = root.segments
+        val normalizedSegments = normalized.segments
+        
+        if (normalizedSegments.size < rootSegments.size) {
+            return Outcome.Failure(AppError.OutsideWorkspace)
         }
+        
+        for (i in rootSegments.indices) {
+            if (rootSegments[i] != normalizedSegments[i]) {
+                return Outcome.Failure(AppError.OutsideWorkspace)
+            }
+        }
+        
+        return Outcome.Success(normalized)
     }
     
     fun checkMutable(path: Path): Outcome<Unit> {

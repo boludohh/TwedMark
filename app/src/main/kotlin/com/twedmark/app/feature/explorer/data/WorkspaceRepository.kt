@@ -2,7 +2,6 @@ package com.twedmark.app.feature.explorer.data
 
 import com.twedmark.app.core.common.AppDispatchers
 import com.twedmark.app.core.file.FileNode
-import com.twedmark.app.core.file.NodeKind
 import com.twedmark.app.core.file.WorkspaceManager
 import com.twedmark.app.core.file.AllowedFormats
 import com.twedmark.app.core.file.NameSanitizer
@@ -12,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okio.FileSystem
 import okio.Path
 
@@ -47,27 +47,42 @@ class WorkspaceRepository(
     }
 
     suspend fun refreshAll() {
-        val expanded = expandedFolders.value
-        val nodes = mutableListOf<FileNode>()
-        buildTree(
-            path = manager.workspaceRoot,
-            depth = 0,
-            expanded = expanded,
-            nodes = nodes,
-            maxDepth = 8
-        )
-        _tree.value = nodes
+        manager.ensureStructure()
+        withContext(dispatchers.io) {
+            val expanded = expandedFolders.value
+            val nodes = mutableListOf<FileNode>()
+            buildTree(
+                path = manager.workspaceRoot,
+                depth = 0,
+                expanded = expanded,
+                nodes = nodes,
+                maxDepth = 8
+            )
+            _tree.value = nodes
+        }
     }
 
     suspend fun toggleExpanded(folder: Path) {
-        val current = expandedFolders.value
-        val newExpanded = if (folder in current) {
-            current - folder
-        } else {
-            current + folder
+        withContext(dispatchers.io) {
+            val current = expandedFolders.value
+            val newExpanded = if (folder in current) {
+                current - folder
+            } else {
+                current + folder
+            }
+            expandedFolders.value = newExpanded
+            
+            val expanded = expandedFolders.value
+            val nodes = mutableListOf<FileNode>()
+            buildTree(
+                path = manager.workspaceRoot,
+                depth = 0,
+                expanded = expanded,
+                nodes = nodes,
+                maxDepth = 8
+            )
+            _tree.value = nodes
         }
-        expandedFolders.value = newExpanded
-        refreshAll()
     }
 
     private fun buildTree(
@@ -88,10 +103,15 @@ class WorkspaceRepository(
                     val name = child.name
                     !name.startsWith(".") && !name.endsWith(".tmp")
                 }
+                .map { child ->
+                    // Leemos los metadatos una sola vez por hijo antes de ordenar
+                    child to (fs.metadataOrNull(child)?.isDirectory ?: false)
+                }
                 .sortedWith(compareBy(
-                    { if (fs.metadataOrNull(it)?.isDirectory == true) 0 else 1 },
-                    { NameSanitizer.comparisonKey(it.name) }
+                    { if (it.second) 0 else 1 },
+                    { NameSanitizer.comparisonKey(it.first.name) }
                 ))
+                .map { it.first }
         } else {
             emptyList()
         }

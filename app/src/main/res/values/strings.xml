@@ -9,7 +9,6 @@
     <!-- Debug Paths Screen -->
     <string name="debug_paths_title">Rutas de depuración</string>
     <string name="debug_paths_back">Atrás</string>
-    <string name="debug_paths_placeholder">Pantalla de depuración (implementación en Paso 0.10)</string>
     <string name="debug_paths_run_all">Ejecutar todos</string>
     <string name="debug_paths_summary">Resumen</string>
     <string name="debug_paths_passed">Pasados: %1$d</string>

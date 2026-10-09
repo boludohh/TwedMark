@@ -320,6 +320,48 @@ private val fs = FileSystem.SYSTEM
          val r = wm.requireInsideWorkspace(fuera)
          if (r is Outcome.Failure && r.error is AppError.OutsideWorkspace) null
          else "Esperado: Failure(OutsideWorkspace), Obtenido: $r"
+     },
+     case("WM-requireInsideWorkspace-root") { caseBase ->
+         val wm = WorkspaceManager(fs, caseBase)
+         wm.ensureStructure()
+         val r = wm.requireInsideWorkspace(wm.workspaceRoot)
+         if (r is Outcome.Success && r.value == wm.workspaceRoot) null else "Esperado: Success(root), Obtenido: $r"
+     },
+     case("WM-requireInsideWorkspace-valid") { caseBase ->
+         val wm = WorkspaceManager(fs, caseBase)
+         wm.ensureStructure()
+         val target = wm.workspaceRoot / "a" / "b.md"
+         val r = wm.requireInsideWorkspace(target)
+         if (r is Outcome.Success && r.value == target) null else "Esperado: Success(a/b.md), Obtenido: $r"
+     },
+     case("WM-requireInsideWorkspace-normalized") { caseBase ->
+         val wm = WorkspaceManager(fs, caseBase)
+         wm.ensureStructure()
+         val target = wm.workspaceRoot / "a" / ".." / "b.md"
+         val r = wm.requireInsideWorkspace(target)
+         val expected = wm.workspaceRoot / "b.md"
+         if (r is Outcome.Success && r.value == expected) null else "Esperado: Success(b.md), Obtenido: $r"
+     },
+     case("WM-requireInsideWorkspace-parent") { caseBase ->
+         val wm = WorkspaceManager(fs, caseBase)
+         wm.ensureStructure()
+         val target = wm.workspaceRoot / ".." / "x"
+         val r = wm.requireInsideWorkspace(target)
+         if (r is Outcome.Failure && r.error is AppError.OutsideWorkspace) null else "Esperado: Failure(OutsideWorkspace), Obtenido: $r"
+     },
+     case("WM-requireInsideWorkspace-similar-prefix") { caseBase ->
+         val wm = WorkspaceManager(fs, caseBase)
+         wm.ensureStructure()
+         val target = caseBase / "workspace_otro" / "x"
+         val r = wm.requireInsideWorkspace(target)
+         if (r is Outcome.Failure && r.error is AppError.OutsideWorkspace) null else "Esperado: Failure(OutsideWorkspace), Obtenido: $r"
+     },
+     case("WM-requireInsideWorkspace-similar-prefix-2") { caseBase ->
+         val wm = WorkspaceManager(fs, caseBase)
+         wm.ensureStructure()
+         val target = caseBase / "workspace2"
+         val r = wm.requireInsideWorkspace(target)
+         if (r is Outcome.Failure && r.error is AppError.OutsideWorkspace) null else "Esperado: Failure(OutsideWorkspace), Obtenido: $r"
      }
  )
  private fun atomicWriterCases(): List<DebugCase> = listOf(
