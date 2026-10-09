@@ -1,9 +1,9 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <style name="Theme.TwedMark" parent="android:Theme.Material.Light.NoActionBar">
-        <!-- Splash: fondo blanco puro en tema claro -->
-        <item name="android:windowBackground">@android:color/white</item>
+    <style name="Theme.TwedMark" parent="android:Theme.Material.NoActionBar">
+        <!-- Splash: fondo negro puro en tema oscuro (válido también para AMOLED) -->
+        <item name="android:windowBackground">@android:color/black</item>
 
-        <!-- Barras 100% transparentes (complemento al código EdgeToEdge.kt) -->
+        <!-- Barras 100% transparentes -->
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
 
