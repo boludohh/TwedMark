@@ -59,7 +59,9 @@ class DebugPathsViewModel(
         if (_isRunning.value) return
         viewModelScope.launch(dispatchers.io) {
             _isRunning.value = true
-            val tempBase = appContext.cacheDir.toPath() / "debug-paths" / "${System.currentTimeMillis()}"
+            val baseDir = appContext.cacheDir.toPath()
+            val debugDir = baseDir / "debug-paths"
+            val tempBase = debugDir / System.currentTimeMillis().toString()
             try {
                 fs.createDirectories(tempBase)
                 for (case in cases) {
@@ -417,12 +419,12 @@ class DebugPathsViewModel(
             val repo = WorkspaceRepository(fs, wm, dispatchers)
             repo.refreshAll()
             val tree = repo.tree.value
-            val assetsNode = tree.find { node -> node.path == wm.assetsDir }
+            val assetsNode: com.twedmark.app.core.file.FileNode? = tree.find { node -> node.path == wm.assetsDir }
             if (assetsNode?.isProtected != true) return@case "assets no tiene isProtected=true"
-            val rootIndex = tree.indexOfFirst { node -> node.path == wm.workspaceRoot }
-            val diarioIndex = tree.indexOfFirst { node -> node.name == "Diario.md" }
-            val viajeIndex = tree.indexOfFirst { node -> node.name == "viaje" }
-            val assetsIndex = tree.indexOfFirst { node -> node.name == "assets" }
+            val rootIndex = tree.indexOfFirst { node: com.twedmark.app.core.file.FileNode -> node.path == wm.workspaceRoot }
+            val diarioIndex = tree.indexOfFirst { node: com.twedmark.app.core.file.FileNode -> node.name == "Diario.md" }
+            val viajeIndex = tree.indexOfFirst { node: com.twedmark.app.core.file.FileNode -> node.name == "viaje" }
+            val assetsIndex = tree.indexOfFirst { node: com.twedmark.app.core.file.FileNode -> node.name == "assets" }
             if (rootIndex < 0 || diarioIndex < 0 || viajeIndex < 0 || assetsIndex < 0) {
                 return@case "No se encontraron todos los nodos"
             }
@@ -441,9 +443,9 @@ class DebugPathsViewModel(
             repo.refreshAll()
             repo.toggleExpanded(wm.workspaceRoot / "viaje")
             val tree = repo.tree.value
-            val notasIndex = tree.indexOfFirst { node -> node.name == "notas.md" }
-            val fotoIndex = tree.indexOfFirst { node -> node.name == "foto.png" }
-            val viajeIndex = tree.indexOfFirst { node -> node.name == "viaje" }
+            val notasIndex = tree.indexOfFirst { node: com.twedmark.app.core.file.FileNode -> node.name == "notas.md" }
+            val fotoIndex = tree.indexOfFirst { node: com.twedmark.app.core.file.FileNode -> node.name == "foto.png" }
+            val viajeIndex = tree.indexOfFirst { node: com.twedmark.app.core.file.FileNode -> node.name == "viaje" }
             if (notasIndex < 0 || fotoIndex < 0) return@case "Hijos de viaje no aparecen"
             if (notasIndex <= viajeIndex || fotoIndex <= viajeIndex) {
                 return@case "Hijos no están después de viaje"
