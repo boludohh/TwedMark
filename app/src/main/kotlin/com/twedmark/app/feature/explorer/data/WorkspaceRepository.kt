@@ -2,13 +2,17 @@ package com.twedmark.app.feature.explorer.data
 
 import com.twedmark.app.core.common.AppDispatchers
 import com.twedmark.app.core.file.FileNode
+import com.twedmark.app.core.file.FsEvent
 import com.twedmark.app.core.file.WorkspaceManager
 import com.twedmark.app.core.file.AllowedFormats
 import com.twedmark.app.core.file.NameSanitizer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -24,6 +28,7 @@ import okio.Path
  * - No incluye archivos que empiezan por '.' ni los que terminan en '.tmp'.
  * - Escucha manager.structureRestored y llama a refreshAll().
  * - Máximo 8 niveles bajo workspace/.
+ * - Emite eventos FsEvent cuando se crean, borran, renombran o mueven elementos (Fase 1).
  */
 class WorkspaceRepository(
     private val fs: FileSystem,
@@ -34,6 +39,11 @@ class WorkspaceRepository(
     private val expandedFolders = MutableStateFlow<Set<Path>>(setOf(manager.workspaceRoot))
     private val _tree = MutableStateFlow<List<FileNode>>(emptyList())
     val tree: StateFlow<List<FileNode>> = _tree.asStateFlow()
+
+    // Canal de eventos para notificar cambios en el sistema de archivos a otros componentes (ej. Editor).
+    // extraBufferCapacity = 64 evita bloqueos si ocurren muchas operaciones rápidas seguidas.
+    private val _events = MutableSharedFlow<FsEvent>(extraBufferCapacity = 64)
+    val events: SharedFlow<FsEvent> = _events.asSharedFlow()
 
     init {
         scope.launch {
