@@ -25,4 +25,18 @@
     <string name="crash_log_close">Cerrar</string>
     <string name="crash_log_delete_all">Borrar todos</string>
     <string name="crash_log_all_deleted">Todos los registros han sido eliminados</string>
+    
+    <!-- Editor -->
+    <string name="editor_state_saved">Guardado</string>
+    <string name="editor_state_dirty">Modificado</string>
+    <string name="editor_state_saving">Guardando…</string>
+    <string name="editor_state_failed">Error al guardar</string>
+    <string name="editor_error_not_found">El archivo ya no existe</string>
+    <string name="editor_error_file_too_large">El archivo es demasiado grande para abrir</string>
+    <string name="editor_error_not_utf8">El archivo no es UTF-8 válido</string>
+    <string name="editor_confirm_save_failure_title">Error al guardar</string>
+    <string name="editor_confirm_save_failure_message">No se pudo guardar el archivo actual. ¿Qué deseas hacer?</string>
+    <string name="editor_action_retry">Reintentar</string>
+    <string name="editor_action_discard">Descartar cambios</string>
+    <string name="editor_action_cancel">Cancelar</string>
 </resources>
