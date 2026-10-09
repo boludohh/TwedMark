@@ -66,8 +66,8 @@ class CodeEditorControllerImpl : EditorController {
     fun bind(editor: CodeEditor) {
         this.editor = editor
         
-        // Listener de cambios de contenido
-        editor.subscribeEvent<ContentChangeEvent> { event, _ ->
+        // Listener de cambios de contenido (se pasa la clase explícitamente por ser método genérico de Java)
+        editor.subscribeEvent(ContentChangeEvent::class.java) { event, _ ->
             if (!isLoadingText) {
                 onContentChanged?.invoke()
             }
@@ -75,15 +75,15 @@ class CodeEditorControllerImpl : EditorController {
         }
         
         // Listener de cambios de selección/cursor
-        editor.subscribeEvent<SelectionChangeEvent> { event, _ ->
+        editor.subscribeEvent(SelectionChangeEvent::class.java) { event, _ ->
             val left = event.left
             // sora-editor usa base 0, nosotros exponemos base 1 para la UI
             _cursor.value = CursorPosition(left.line + 1, left.column + 1)
         }
         
-        // Configuración inicial por defecto
-        editor.isWordwrap = false
-        editor.isLineNumberEnabled = true
+        // Configuración inicial por defecto (llamada explícita para evitar conflicto de sobrecargas en Kotlin)
+        editor.setWordwrap(false)
+        editor.setLineNumberEnabled(true)
     }
     
     override fun setOnContentChangedListener(listener: () -> Unit) {
@@ -126,23 +126,24 @@ class CodeEditorControllerImpl : EditorController {
             // Sin selección: insertar prefijo + sufijo y mover cursor al medio
             editor.insertText(prefix + suffix, false)
             val newCol = left.column + prefix.length
-            cursor.setSelection(left.line, newCol)
+            // En sora-editor, el método para mover el cursor simple es set(line, column)
+            cursor.set(left.line, newCol)
         } else {
             // Con selección: envolver el texto seleccionado
             val selectedText = editor.text.substring(left.index, right.index)
             val newText = prefix + selectedText + suffix
             editor.text.replace(left.line, left.column, right.line, right.column, newText)
-            cursor.setSelection(right.line, right.column + prefix.length + suffix.length)
+            cursor.set(right.line, right.column + prefix.length + suffix.length)
         }
         updateUndoRedo()
     }
     
     override fun setWordWrap(enabled: Boolean) {
-        editor?.isWordwrap = enabled
+        editor?.setWordwrap(enabled)
     }
     
     override fun setLineNumbers(enabled: Boolean) {
-        editor?.isLineNumberEnabled = enabled
+        editor?.setLineNumberEnabled(enabled)
     }
     
     override fun focusAndShowKeyboard() {
