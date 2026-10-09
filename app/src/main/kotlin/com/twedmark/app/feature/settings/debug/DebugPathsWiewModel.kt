@@ -61,7 +61,7 @@ class DebugPathsViewModel(
             _isRunning.value = true
             val baseDir = appContext.cacheDir.toPath()
             val debugDir = baseDir / "debug-paths"
-            val tempBase = debugDir / System.currentTimeMillis().toString()
+            val tempBase = debugDir.div(System.currentTimeMillis().toString())
             try {
                 fs.createDirectories(tempBase)
                 for (case in cases) {
@@ -344,11 +344,11 @@ class DebugPathsViewModel(
             val target = caseBase / "test.md"
             val w1 = writer.write(target, "hola".toByteArray())
             if (w1 !is Outcome.Success) return@case "Escritura 1 falló: $w1"
-            val contenido = fs.read(target) { it.readUtf8() }
+            val contenido = fs.read(target) { readUtf8() }
             if (contenido != "hola") return@case "Contenido incorrecto: $contenido"
             val w2 = writer.write(target, "adios".toByteArray())
             if (w2 !is Outcome.Success) return@case "Escritura 2 falló: $w2"
-            val contenido2 = fs.read(target) { it.readUtf8() }
+            val contenido2 = fs.read(target) { readUtf8() }
             if (contenido2 != "adios") return@case "Contenido 2 incorrecto: $contenido2"
             val tmpExists = fs.exists(caseBase / "test.md.tmp")
             if (tmpExists) "Quedó un .tmp huérfano" else null
