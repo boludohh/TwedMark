@@ -20,6 +20,19 @@
     kotlinx.serialization.KSerializer serializer();
 }
 
+# Preservar las rutas de navegación serializables
+-keep class com.twedmark.app.app.** { *; }
+
+# ==========================================
+# Reglas para Koin
+# ==========================================
+-keep class org.koin.** { *; }
+-keep class org.koin.android.** { *; }
+-keep class org.koin.androidx.** { *; }
+-keepclassmembers class * {
+    @org.koin.core.annotation.* <methods>;
+}
+
 # ==========================================
 # Reglas para Sora Editor y TextMate
 # ==========================================
@@ -27,7 +40,6 @@
 -keep class org.eclipse.tm4e.** { *; }
 
 # Preservar las clases internas de Kotlin que Sora Editor necesita
-# ShareableData usa Cloneable con implementaciones por defecto
 -keep class kotlin.Cloneable { *; }
 -keep class kotlin.Cloneable$DefaultImpls { *; }
 -keep class kotlin.jvm.internal.** { *; }
