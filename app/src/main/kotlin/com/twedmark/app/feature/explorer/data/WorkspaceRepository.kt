@@ -310,6 +310,56 @@ class WorkspaceRepository(
         }
     }
 
+    // --- Utilidades Adicionales ---
+
+    /**
+     * Cuenta recursivamente todos los descendientes de una carpeta.
+     * Incluye archivos y subcarpetas (y sus propios descendientes).
+     */
+    suspend fun countDescendants(path: Path): Int {
+        return withContext(dispatchers.io) {
+            countDescendantsRecursive(path)
+        }
+    }
+
+    private fun countDescendantsRecursive(path: Path): Int {
+        val isDir = fs.metadataOrNull(path)?.isDirectory ?: false
+        if (!isDir) return 0
+        
+        val children = runCatching { fs.list(path) }.getOrDefault(emptyList())
+        var count = children.size
+        
+        for (child in children) {
+            count += countDescendantsRecursive(child)
+        }
+        
+        return count
+    }
+
+    /**
+     * Lista todas las carpetas del workspace (incluyendo la raíz).
+     * Se usa para el diálogo de "mover archivo".
+     */
+    suspend fun listFolders(): List<Path> {
+        return withContext(dispatchers.io) {
+            val folders = mutableListOf<Path>()
+            collectFoldersRecursive(manager.workspaceRoot, folders)
+            folders
+        }
+    }
+
+    private fun collectFoldersRecursive(path: Path, accumulator: MutableList<Path>) {
+        val isDir = fs.metadataOrNull(path)?.isDirectory ?: false
+        if (!isDir) return
+        
+        accumulator.add(path)
+        
+        val children = runCatching { fs.list(path) }.getOrDefault(emptyList())
+        for (child in children) {
+            collectFoldersRecursive(child, accumulator)
+        }
+    }
+
     private fun buildTree(
         path: Path,
         depth: Int,

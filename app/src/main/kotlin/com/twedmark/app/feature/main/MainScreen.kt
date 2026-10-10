@@ -21,6 +21,7 @@ import com.twedmark.app.feature.explorer.presentation.ExplorerEffect
 import com.twedmark.app.feature.explorer.presentation.ExplorerViewModel
 import com.twedmark.app.feature.explorer.ui.ExplorerDialogHost
 import com.twedmark.app.feature.explorer.ui.ExplorerPanel
+import com.twedmark.app.ui.theme.MaterialThemeExtended
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
@@ -133,7 +134,7 @@ fun MainScreen(
                                 Text(
                                     text = stringResource(R.string.editor_state_dirty),
                                     style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.warning,
+                                    color = MaterialThemeExtended.colorScheme.warning,
                                     modifier = Modifier.padding(horizontal = 8.dp)
                                 )
                             }
