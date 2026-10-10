@@ -112,7 +112,9 @@ class CodeEditorControllerImpl : EditorController {
     }
     
     override fun insertAtCursor(text: String) {
-        editor?.insertText(text, false)
+        // El segundo parámetro es el desplazamiento del cursor (Int). 
+        // text.length deja el cursor al final del texto insertado.
+        editor?.insertText(text, text.length)
         updateUndoRedo()
     }
     
@@ -123,11 +125,9 @@ class CodeEditorControllerImpl : EditorController {
         val right = cursor.right()
         
         if (left.line == right.line && left.column == right.column) {
-            // Sin selección: insertar prefijo + sufijo y mover cursor al medio
-            editor.insertText(prefix + suffix, false)
-            val newCol = left.column + prefix.length
-            // En sora-editor, el método para mover el cursor simple es set(line, column)
-            cursor.set(left.line, newCol)
+            // Sin selección: insertar prefijo + sufijo.
+            // prefix.length deja el cursor justo en medio, listo para escribir.
+            editor.insertText(prefix + suffix, prefix.length)
         } else {
             // Con selección: envolver el texto seleccionado
             val selectedText = editor.text.substring(left.index, right.index)
