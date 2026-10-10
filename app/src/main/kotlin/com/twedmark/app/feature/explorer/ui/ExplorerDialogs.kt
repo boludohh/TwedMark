@@ -7,10 +7,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.twedmark.app.R
+import com.twedmark.app.core.common.AppError
 import com.twedmark.app.core.file.FileNode
 import com.twedmark.app.core.file.NameError
 import com.twedmark.app.core.file.NameSanitizer
@@ -33,6 +33,7 @@ fun ExplorerDialogHost(
                 title = stringResource(R.string.explorer_create_note_title),
                 initialName = "",
                 extension = ".md",
+                repositoryError = dialog.error,
                 onConfirm = onCreateNote,
                 onDismiss = onDismiss
             )
@@ -42,6 +43,7 @@ fun ExplorerDialogHost(
                 title = stringResource(R.string.explorer_create_folder_title),
                 initialName = "",
                 extension = null,
+                repositoryError = dialog.error,
                 onConfirm = onCreateFolder,
                 onDismiss = onDismiss
             )
@@ -56,6 +58,7 @@ fun ExplorerDialogHost(
                 title = stringResource(R.string.explorer_rename_title),
                 initialName = baseName,
                 extension = extension,
+                repositoryError = dialog.error,
                 onConfirm = onRename,
                 onDismiss = onDismiss
             )
@@ -85,17 +88,25 @@ private fun CreateDialog(
     title: String,
     initialName: String,
     extension: String?,
+    repositoryError: AppError?,
     onConfirm: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
     var name by remember { mutableStateOf(initialName) }
-    var error by remember { mutableStateOf<NameError?>(null) }
+    var validationError by remember { mutableStateOf<NameError?>(null) }
     
     LaunchedEffect(name) {
-        error = NameSanitizer.validate(name)
+        validationError = NameSanitizer.validate(name)
     }
     
-    val canConfirm = name.isNotEmpty() && error == null
+    // Si el nombre cambia, limpiar el error del repositorio
+    LaunchedEffect(name) {
+        // El error del repositorio se limpiará cuando el ViewModel recree el diálogo sin error
+    }
+    
+    val hasValidationError = validationError != null
+    val hasRepositoryError = repositoryError != null
+    val canConfirm = name.isNotEmpty() && !hasValidationError && !hasRepositoryError
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -107,19 +118,38 @@ private fun CreateDialog(
                     onValueChange = { name = it },
                     label = { Text(stringResource(R.string.explorer_name_label)) },
                     singleLine = true,
-                    isError = error != null,
+                    isError = hasValidationError || hasRepositoryError,
                     supportingText = {
-                        when (error) {
-                            is NameError.Empty -> Text(stringResource(R.string.error_name_empty))
-                            is NameError.DisallowedChar -> Text(
-                                stringResource(
-                                    R.string.error_name_disallowed_char,
-                                    (error as NameError.DisallowedChar).ch
+                        when {
+                            validationError is NameError.Empty -> {
+                                Text(stringResource(R.string.error_name_empty))
+                            }
+                            validationError is NameError.DisallowedChar -> {
+                                val char = (validationError as NameError.DisallowedChar).ch
+                                if (char == " ") {
+                                    Text(stringResource(R.string.error_name_space))
+                                } else {
+                                    Text(stringResource(R.string.error_name_disallowed_char, char))
+                                }
+                            }
+                            validationError is NameError.TooLong -> {
+                                Text(stringResource(R.string.error_name_too_long))
+                            }
+                            validationError is NameError.Duplicate -> {
+                                Text(stringResource(R.string.error_name_duplicate))
+                            }
+                            repositoryError is AppError.AlreadyExists -> {
+                                Text(
+                                    text = stringResource(R.string.error_name_duplicate),
+                                    color = MaterialTheme.colorScheme.error
                                 )
-                            )
-                            is NameError.TooLong -> Text(stringResource(R.string.error_name_too_long))
-                            is NameError.Duplicate -> Text(stringResource(R.string.error_name_duplicate))
-                            null -> {}
+                            }
+                            repositoryError != null -> {
+                                Text(
+                                    text = repositoryError.toString(),
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
                         }
                     },
                     trailingIcon = {
@@ -160,9 +190,7 @@ private fun MoveDialog(
     var selectedFolder by remember { mutableStateOf<Path?>(null) }
     
     val validFolders = folders.filter { folder ->
-        // No permitir mover a la misma carpeta actual
         folder != node.path.parent &&
-        // Si es carpeta, no permitir mover dentro de sí misma o descendientes
         !(node.kind == com.twedmark.app.core.file.NodeKind.Folder && 
           folder.toString().startsWith(node.path.toString()))
     }

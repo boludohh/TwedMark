@@ -15,11 +15,13 @@ import kotlinx.coroutines.launch
 import okio.Path
 
 sealed interface ExplorerDialog {
-    data class CreateNote(val parent: Path) : ExplorerDialog
-    data class CreateFolder(val parent: Path) : ExplorerDialog
-    data class Rename(val node: FileNode) : ExplorerDialog
-    data class Move(val node: FileNode, val folders: List<Path>) : ExplorerDialog
-    data class ConfirmDelete(val node: FileNode, val descendants: Int) : ExplorerDialog
+    val error: AppError?
+    
+    data class CreateNote(val parent: Path, override val error: AppError? = null) : ExplorerDialog
+    data class CreateFolder(val parent: Path, override val error: AppError? = null) : ExplorerDialog
+    data class Rename(val node: FileNode, override val error: AppError? = null) : ExplorerDialog
+    data class Move(val node: FileNode, val folders: List<Path>, override val error: AppError? = null) : ExplorerDialog
+    data class ConfirmDelete(val node: FileNode, val descendants: Int, override val error: AppError? = null) : ExplorerDialog
 }
 
 sealed interface ExplorerEffect {
@@ -44,7 +46,6 @@ class ExplorerViewModel(private val repository: WorkspaceRepository) : ViewModel
     val effects: StateFlow<ExplorerEffect?> = _effects.asStateFlow()
 
     init {
-        // Seleccionar workspaceRoot por defecto (según la guía de Fase 1)
         _uiState.update { it.copy(selectedFolder = repository.workspaceRoot) }
 
         viewModelScope.launch {
@@ -152,7 +153,15 @@ class ExplorerViewModel(private val repository: WorkspaceRepository) : ViewModel
                     _effects.value = ExplorerEffect.OpenNote(result.value)
                 }
                 is Outcome.Failure -> {
-                    _effects.value = ExplorerEffect.Message(result.error)
+                    // Si es AlreadyExists, mantener el diálogo abierto y mostrar el error dentro
+                    if (result.error is AppError.AlreadyExists) {
+                        _uiState.update { 
+                            it.copy(dialog = ExplorerDialog.CreateNote(dialog.parent, result.error)) 
+                        }
+                    } else {
+                        dismissDialog()
+                        _effects.value = ExplorerEffect.Message(result.error)
+                    }
                 }
             }
         }
@@ -167,7 +176,15 @@ class ExplorerViewModel(private val repository: WorkspaceRepository) : ViewModel
                     dismissDialog()
                 }
                 is Outcome.Failure -> {
-                    _effects.value = ExplorerEffect.Message(result.error)
+                    // Si es AlreadyExists, mantener el diálogo abierto y mostrar el error dentro
+                    if (result.error is AppError.AlreadyExists) {
+                        _uiState.update { 
+                            it.copy(dialog = ExplorerDialog.CreateFolder(dialog.parent, result.error)) 
+                        }
+                    } else {
+                        dismissDialog()
+                        _effects.value = ExplorerEffect.Message(result.error)
+                    }
                 }
             }
         }
@@ -180,9 +197,21 @@ class ExplorerViewModel(private val repository: WorkspaceRepository) : ViewModel
             when (result) {
                 is Outcome.Success -> {
                     dismissDialog()
+                    // Aviso informativo tras renombrar una nota
+                    if (dialog.node.kind == NodeKind.Note) {
+                        _effects.value = ExplorerEffect.Info("Otros archivos podrían apuntar a este.")
+                    }
                 }
                 is Outcome.Failure -> {
-                    _effects.value = ExplorerEffect.Message(result.error)
+                    // Si es AlreadyExists, mantener el diálogo abierto y mostrar el error dentro
+                    if (result.error is AppError.AlreadyExists) {
+                        _uiState.update { 
+                            it.copy(dialog = ExplorerDialog.Rename(dialog.node, result.error)) 
+                        }
+                    } else {
+                        dismissDialog()
+                        _effects.value = ExplorerEffect.Message(result.error)
+                    }
                 }
             }
         }
@@ -197,6 +226,7 @@ class ExplorerViewModel(private val repository: WorkspaceRepository) : ViewModel
                     dismissDialog()
                 }
                 is Outcome.Failure -> {
+                    dismissDialog()
                     _effects.value = ExplorerEffect.Message(result.error)
                 }
             }
@@ -212,6 +242,7 @@ class ExplorerViewModel(private val repository: WorkspaceRepository) : ViewModel
                     dismissDialog()
                 }
                 is Outcome.Failure -> {
+                    dismissDialog()
                     _effects.value = ExplorerEffect.Message(result.error)
                 }
             }

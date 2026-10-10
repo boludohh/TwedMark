@@ -68,6 +68,7 @@
     <!-- Errors -->
     <string name="error_name_empty">El nombre no puede estar vacío</string>
     <string name="error_name_disallowed_char">Carácter no permitido: %1$s</string>
+    <string name="error_name_space">Los espacios no están permitidos</string>
     <string name="error_name_too_long">El nombre es demasiado largo</string>
     <string name="error_name_duplicate">Ya existe un archivo con ese nombre</string>
 </resources>
