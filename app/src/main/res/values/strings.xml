@@ -57,6 +57,11 @@
     <string name="explorer_delete_message_with_descendants">¿Eliminar \"%1$s\" y sus %2$d elementos?</string>
     <string name="explorer_delete_warning">Esta acción es definitiva y no se puede deshacer.</string>
     
+    <!-- Context Menu -->
+    <string name="explorer_context_rename">Renombrar</string>
+    <string name="explorer_context_move">Mover</string>
+    <string name="explorer_context_delete">Eliminar</string>
+    
     <!-- Actions -->
     <string name="action_open_menu">Abrir menú</string>
     <string name="action_save">Guardar</string>

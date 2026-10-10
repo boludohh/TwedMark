@@ -40,10 +40,15 @@ fun MainScreen(
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // BackHandler: primero cierra diálogos, luego drawer, luego sale
-    BackHandler(enabled = explorerUiState.dialog != null || drawerState.isOpen) {
+    // BackHandler: primero cierra diálogos, luego menú contextual, luego drawer, luego sale
+    BackHandler(
+        enabled = explorerUiState.dialog != null || 
+                  explorerUiState.contextMenuNode != null || 
+                  drawerState.isOpen
+    ) {
         when {
             explorerUiState.dialog != null -> explorerViewModel.dismissDialog()
+            explorerUiState.contextMenuNode != null -> explorerViewModel.dismissContextMenu()
             drawerState.isOpen -> scope.launch { drawerState.close() }
         }
     }
@@ -95,15 +100,17 @@ fun MainScreen(
                         }
                     },
                     onNodeLongPress = explorerViewModel::onNodeLongPress,
+                    onDismissContextMenu = explorerViewModel::dismissContextMenu,
+                    onContextMenuRename = explorerViewModel::onContextMenuRename,
+                    onContextMenuMove = explorerViewModel::onContextMenuMove,
+                    onContextMenuDelete = explorerViewModel::onContextMenuDelete,
                     onCreateNote = {
-                        // Cerrar drawer antes de mostrar el diálogo
                         scope.launch {
                             drawerState.close()
                             explorerViewModel.showCreateNoteDialog()
                         }
                     },
                     onCreateFolder = {
-                        // Cerrar drawer antes de mostrar el diálogo
                         scope.launch {
                             drawerState.close()
                             explorerViewModel.showCreateFolderDialog()
@@ -132,7 +139,6 @@ fun MainScreen(
                         }
                     },
                     actions = {
-                        // Indicador de estado de guardado
                         when (editorUiState.saveState) {
                             is SaveState.Saved -> {
                                 Text(
@@ -194,7 +200,6 @@ fun MainScreen(
                         }
                     )
                 } else {
-                    // Estado vacío: sin documento abierto
                     Column(
                         modifier = Modifier
                             .fillMaxSize()

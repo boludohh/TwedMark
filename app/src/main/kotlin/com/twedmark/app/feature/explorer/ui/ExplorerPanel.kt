@@ -9,7 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -26,6 +26,10 @@ fun ExplorerPanel(
     uiState: ExplorerUiState,
     onNodeTap: (FileNode) -> Unit,
     onNodeLongPress: (FileNode) -> Unit,
+    onDismissContextMenu: () -> Unit,
+    onContextMenuRename: () -> Unit,
+    onContextMenuMove: () -> Unit,
+    onContextMenuDelete: () -> Unit,
     onCreateNote: () -> Unit,
     onCreateFolder: () -> Unit,
     modifier: Modifier = Modifier
@@ -72,16 +76,31 @@ fun ExplorerPanel(
         )
 
         // Árbol de archivos
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(vertical = 8.dp)
-        ) {
-            items(uiState.tree, key = { it.path.toString() }) { node ->
-                ExplorerNodeItem(
-                    node = node,
-                    isSelected = node.path == uiState.selectedFolder,
-                    onTap = { onNodeTap(node) },
-                    onLongPress = { onNodeLongPress(node) }
+        Box(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(vertical = 8.dp)
+            ) {
+                items(uiState.tree, key = { it.path.toString() }) { node ->
+                    ExplorerNodeItem(
+                        node = node,
+                        isSelected = node.path == uiState.selectedFolder,
+                        isContextMenuTarget = node.path == uiState.contextMenuNode?.path,
+                        onTap = { onNodeTap(node) },
+                        onLongPress = { onNodeLongPress(node) }
+                    )
+                }
+            }
+
+            // Menú contextual anclado al nodo objetivo
+            val contextNode = uiState.contextMenuNode
+            if (contextNode != null) {
+                ContextMenu(
+                    node = contextNode,
+                    onDismiss = onDismissContextMenu,
+                    onRename = onContextMenuRename,
+                    onMove = onContextMenuMove,
+                    onDelete = onContextMenuDelete
                 )
             }
         }
@@ -93,6 +112,7 @@ fun ExplorerPanel(
 private fun ExplorerNodeItem(
     node: FileNode,
     isSelected: Boolean,
+    isContextMenuTarget: Boolean,
     onTap: () -> Unit,
     onLongPress: () -> Unit
 ) {
@@ -103,7 +123,7 @@ private fun ExplorerNodeItem(
             .fillMaxWidth()
             .padding(start = indent, end = 8.dp, top = 4.dp, bottom = 4.dp)
             .then(
-                if (isSelected) {
+                if (isSelected || isContextMenuTarget) {
                     Modifier.border(
                         width = 2.dp,
                         color = MaterialTheme.colorScheme.primary,
@@ -157,5 +177,122 @@ private fun ExplorerNodeItem(
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.weight(1f)
         )
+    }
+}
+
+/**
+ * Menú contextual con opciones: Renombrar, Mover, Eliminar.
+ * Se muestra centrado en la pantalla cuando hay un nodo marcado.
+ */
+@Composable
+private fun ContextMenu(
+    node: FileNode,
+    onDismiss: () -> Unit,
+    onRename: () -> Unit,
+    onMove: () -> Unit,
+    onDelete: () -> Unit
+) {
+    // Overlay semi-transparente para capturar taps fuera del menú
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.32f))
+            .combinedClickable(
+                onClick = onDismiss,
+                onLongClick = null
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Card(
+            modifier = Modifier
+                .widthIn(min = 220.dp, max = 320.dp)
+                .padding(16.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
+            )
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            ) {
+                // Cabecera con el nombre del archivo
+                Text(
+                    text = node.name,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+                
+                Divider(
+                    color = MaterialTheme.colorScheme.outlineVariant,
+                    thickness = 1.dp,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+
+                // Ítem: Renombrar
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = stringResource(R.string.explorer_context_rename),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    },
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_edit_filled),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    },
+                    onClick = onRename
+                )
+                
+                // Ítem: Mover
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = stringResource(R.string.explorer_context_move),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    },
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_move_item),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    },
+                    onClick = onMove
+                )
+                
+                Divider(
+                    color = MaterialTheme.colorScheme.outlineVariant,
+                    thickness = 1.dp,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
+                
+                // Ítem: Eliminar (en rojo)
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = stringResource(R.string.explorer_context_delete),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    },
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_delete_filled),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    },
+                    onClick = onDelete
+                )
+            }
+        }
     }
 }

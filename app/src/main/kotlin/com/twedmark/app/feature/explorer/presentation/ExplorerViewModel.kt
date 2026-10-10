@@ -34,6 +34,7 @@ data class ExplorerUiState(
     val tree: List<FileNode> = emptyList(),
     val selectedFolder: Path? = null,
     val dialog: ExplorerDialog? = null,
+    val contextMenuNode: FileNode? = null,
     val isLoading: Boolean = false
 )
 
@@ -76,6 +77,12 @@ class ExplorerViewModel(private val repository: WorkspaceRepository) : ViewModel
     }
 
     fun onNodeTap(node: FileNode) {
+        // Si hay un menú contextual abierto, lo cerramos al tocar cualquier nodo
+        if (_uiState.value.contextMenuNode != null) {
+            _uiState.update { it.copy(contextMenuNode = null) }
+            return
+        }
+        
         when (node.kind) {
             NodeKind.Folder -> {
                 toggleExpanded(node)
@@ -93,19 +100,53 @@ class ExplorerViewModel(private val repository: WorkspaceRepository) : ViewModel
         }
     }
 
+    /**
+     * Al hacer long-press, solo marcamos el nodo para mostrar el menú contextual.
+     * No abrimos ningún diálogo directamente.
+     */
     fun onNodeLongPress(node: FileNode) {
         if (node.isProtected) return
-        
+        _uiState.update { it.copy(contextMenuNode = node) }
+    }
+
+    /**
+     * Cierra el menú contextual sin realizar ninguna acción.
+     */
+    fun dismissContextMenu() {
+        _uiState.update { it.copy(contextMenuNode = null) }
+    }
+
+    /**
+     * Acción del menú contextual: abre el diálogo de renombrar.
+     */
+    fun onContextMenuRename() {
+        val node = _uiState.value.contextMenuNode ?: return
+        _uiState.update { it.copy(contextMenuNode = null, dialog = ExplorerDialog.Rename(node)) }
+    }
+
+    /**
+     * Acción del menú contextual: abre el diálogo de mover.
+     */
+    fun onContextMenuMove() {
+        val node = _uiState.value.contextMenuNode ?: return
+        _uiState.update { it.copy(contextMenuNode = null) }
+        viewModelScope.launch {
+            val folders = repository.listFolders()
+            _uiState.update { it.copy(dialog = ExplorerDialog.Move(node, folders)) }
+        }
+    }
+
+    /**
+     * Acción del menú contextual: abre el diálogo de confirmación de borrado.
+     */
+    fun onContextMenuDelete() {
+        val node = _uiState.value.contextMenuNode ?: return
+        _uiState.update { it.copy(contextMenuNode = null) }
         viewModelScope.launch {
             val descendants = if (node.kind == NodeKind.Folder) {
                 repository.countDescendants(node.path)
             } else 0
-            
-            _uiState.update { 
-                it.copy(
-                    dialog = ExplorerDialog.ConfirmDelete(node, descendants)
-                )
-            }
+            _uiState.update { it.copy(dialog = ExplorerDialog.ConfirmDelete(node, descendants)) }
         }
     }
 
@@ -153,7 +194,6 @@ class ExplorerViewModel(private val repository: WorkspaceRepository) : ViewModel
                     _effects.value = ExplorerEffect.OpenNote(result.value)
                 }
                 is Outcome.Failure -> {
-                    // Si es AlreadyExists, mantener el diálogo abierto y mostrar el error dentro
                     if (result.error is AppError.AlreadyExists) {
                         _uiState.update { 
                             it.copy(dialog = ExplorerDialog.CreateNote(dialog.parent, result.error)) 
@@ -176,7 +216,6 @@ class ExplorerViewModel(private val repository: WorkspaceRepository) : ViewModel
                     dismissDialog()
                 }
                 is Outcome.Failure -> {
-                    // Si es AlreadyExists, mantener el diálogo abierto y mostrar el error dentro
                     if (result.error is AppError.AlreadyExists) {
                         _uiState.update { 
                             it.copy(dialog = ExplorerDialog.CreateFolder(dialog.parent, result.error)) 
@@ -197,13 +236,11 @@ class ExplorerViewModel(private val repository: WorkspaceRepository) : ViewModel
             when (result) {
                 is Outcome.Success -> {
                     dismissDialog()
-                    // Aviso informativo tras renombrar una nota
                     if (dialog.node.kind == NodeKind.Note) {
                         _effects.value = ExplorerEffect.Info("Otros archivos podrían apuntar a este.")
                     }
                 }
                 is Outcome.Failure -> {
-                    // Si es AlreadyExists, mantener el diálogo abierto y mostrar el error dentro
                     if (result.error is AppError.AlreadyExists) {
                         _uiState.update { 
                             it.copy(dialog = ExplorerDialog.Rename(dialog.node, result.error)) 
