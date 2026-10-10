@@ -39,4 +39,35 @@
     <string name="editor_action_retry">Reintentar</string>
     <string name="editor_action_discard">Descartar cambios</string>
     <string name="editor_action_cancel">Cancelar</string>
+    <string name="editor_no_document">No hay ningún documento abierto</string>
+    <string name="editor_open_explorer">Abrir explorador</string>
+    
+    <!-- Explorer -->
+    <string name="explorer_title">Explorador</string>
+    <string name="explorer_create_note">Crear nota</string>
+    <string name="explorer_create_folder">Crear carpeta</string>
+    <string name="explorer_create_note_title">Nueva nota</string>
+    <string name="explorer_create_folder_title">Nueva carpeta</string>
+    <string name="explorer_rename_title">Renombrar</string>
+    <string name="explorer_move_title">Mover</string>
+    <string name="explorer_delete_title">Eliminar</string>
+    <string name="explorer_name_label">Nombre</string>
+    <string name="explorer_move_message">Mover \"%1$s\" a:</string>
+    <string name="explorer_delete_message">¿Eliminar \"%1$s\"?</string>
+    <string name="explorer_delete_message_with_descendants">¿Eliminar \"%1$s\" y sus %2$d elementos?</string>
+    <string name="explorer_delete_warning">Esta acción es definitiva y no se puede deshacer.</string>
+    
+    <!-- Actions -->
+    <string name="action_open_menu">Abrir menú</string>
+    <string name="action_save">Guardar</string>
+    <string name="action_accept">Aceptar</string>
+    <string name="action_cancel">Cancelar</string>
+    <string name="action_move">Mover</string>
+    <string name="action_delete">Eliminar</string>
+    
+    <!-- Errors -->
+    <string name="error_name_empty">El nombre no puede estar vacío</string>
+    <string name="error_name_disallowed_char">Carácter no permitido: %1$s</string>
+    <string name="error_name_too_long">El nombre es demasiado largo</string>
+    <string name="error_name_duplicate">Ya existe un archivo con ese nombre</string>
 </resources>
