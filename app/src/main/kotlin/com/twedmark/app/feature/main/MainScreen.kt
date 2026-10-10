@@ -95,8 +95,20 @@ fun MainScreen(
                         }
                     },
                     onNodeLongPress = explorerViewModel::onNodeLongPress,
-                    onCreateNote = explorerViewModel::showCreateNoteDialog,
-                    onCreateFolder = explorerViewModel::showCreateFolderDialog
+                    onCreateNote = {
+                        // Cerrar drawer antes de mostrar el diálogo
+                        scope.launch {
+                            drawerState.close()
+                            explorerViewModel.showCreateNoteDialog()
+                        }
+                    },
+                    onCreateFolder = {
+                        // Cerrar drawer antes de mostrar el diálogo
+                        scope.launch {
+                            drawerState.close()
+                            explorerViewModel.showCreateFolderDialog()
+                        }
+                    }
                 )
             }
         }
