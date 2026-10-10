@@ -11,10 +11,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.Lifecycle
 import com.twedmark.app.R
+import com.twedmark.app.core.common.FlushReason
 import com.twedmark.app.feature.editor.domain.SaveState
 import com.twedmark.app.feature.editor.presentation.EditorEvent
 import com.twedmark.app.feature.editor.presentation.EditorViewModel
-import com.twedmark.app.feature.editor.presentation.FlushReason
 import com.twedmark.app.feature.editor.ui.CodeEditorView
 import com.twedmark.app.feature.explorer.presentation.ExplorerDialog
 import com.twedmark.app.feature.explorer.presentation.ExplorerEffect
@@ -53,7 +53,7 @@ fun MainScreen(
         }
     }
 
-    // Flush al pasar a segundo plano (ON_STOP)
+    // Flush al pasar a segundo plano (ON_STOP de la pantalla)
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) {
         editorViewModel.sendEvent(EditorEvent.FlushRequested(FlushReason.ScreenStopped))
     }

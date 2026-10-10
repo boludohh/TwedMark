@@ -9,5 +9,5 @@ import org.koin.dsl.module
 val editorModule = module {
     factory { DocumentSaver(get(), get()) }
     single { EditorPrefs(get()) }
-    viewModel { EditorViewModel(get(), get(), get(), get(), get()) }
+    viewModel { EditorViewModel(get(), get(), get(), get(), get(), get()) }
 }

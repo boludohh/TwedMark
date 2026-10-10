@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.twedmark.app.core.common.AppDispatchers
 import com.twedmark.app.core.common.AppError
+import com.twedmark.app.core.common.ApplicationScope
 import com.twedmark.app.core.common.Outcome
 import com.twedmark.app.core.file.FsEvent
 import com.twedmark.app.core.file.NoteIO
@@ -32,15 +33,13 @@ sealed interface EditorEvent {
     data object ContentChanged : EditorEvent
     data class SnapshotReady(val text: String) : EditorEvent
     data object SaveClicked : EditorEvent
-    data class FlushRequested(val reason: FlushReason) : EditorEvent
+    data class FlushRequested(val reason: com.twedmark.app.core.common.FlushReason) : EditorEvent
     data object CloseDocument : EditorEvent
     data object ToggleWordWrap : EditorEvent
     data object ToggleLineNumbers : EditorEvent
     data object RetryAfterFailure : EditorEvent
     data object DiscardAfterFailure : EditorEvent
 }
-
-enum class FlushReason { Debounce, Manual, AppPaused, ScreenStopped, SwitchingFile, Closing }
 
 sealed interface EditorEffect {
     data class Message(val error: AppError) : EditorEffect
@@ -53,7 +52,8 @@ class EditorViewModel(
     private val documentSaver: DocumentSaver,
     private val prefs: EditorPrefs,
     private val noteIO: NoteIO,
-    private val dispatchers: AppDispatchers
+    private val dispatchers: AppDispatchers,
+    private val applicationScope: ApplicationScope
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(EditorUiState())
@@ -110,6 +110,13 @@ class EditorViewModel(
         viewModelScope.launch {
             documentSaver.state.collect { state ->
                 _uiState.update { it.copy(saveState = state) }
+            }
+        }
+        
+        // Observar eventos de ciclo de vida del proceso
+        viewModelScope.launch {
+            applicationScope.processLifecycleEvents.collect { reason ->
+                _events.emit(EditorEvent.FlushRequested(reason))
             }
         }
     }
