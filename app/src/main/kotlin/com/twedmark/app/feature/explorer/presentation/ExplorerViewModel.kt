@@ -44,6 +44,9 @@ class ExplorerViewModel(private val repository: WorkspaceRepository) : ViewModel
     val effects: StateFlow<ExplorerEffect?> = _effects.asStateFlow()
 
     init {
+        // Seleccionar workspaceRoot por defecto (según la guía de Fase 1)
+        _uiState.update { it.copy(selectedFolder = repository.workspaceRoot) }
+
         viewModelScope.launch {
             repository.tree.collect { tree ->
                 _uiState.update { it.copy(tree = tree) }
@@ -97,8 +100,6 @@ class ExplorerViewModel(private val repository: WorkspaceRepository) : ViewModel
                 repository.countDescendants(node.path)
             } else 0
             
-            val folders = repository.listFolders()
-            
             _uiState.update { 
                 it.copy(
                     dialog = ExplorerDialog.ConfirmDelete(node, descendants)
@@ -108,12 +109,12 @@ class ExplorerViewModel(private val repository: WorkspaceRepository) : ViewModel
     }
 
     fun showCreateNoteDialog() {
-        val parent = _uiState.value.selectedFolder ?: return
+        val parent = _uiState.value.selectedFolder ?: repository.workspaceRoot
         _uiState.update { it.copy(dialog = ExplorerDialog.CreateNote(parent)) }
     }
 
     fun showCreateFolderDialog() {
-        val parent = _uiState.value.selectedFolder ?: return
+        val parent = _uiState.value.selectedFolder ?: repository.workspaceRoot
         _uiState.update { it.copy(dialog = ExplorerDialog.CreateFolder(parent)) }
     }
 

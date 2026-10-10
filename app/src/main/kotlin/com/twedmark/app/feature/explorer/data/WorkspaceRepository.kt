@@ -44,6 +44,9 @@ class WorkspaceRepository(
     private val _tree = MutableStateFlow<List<FileNode>>(emptyList())
     val tree: StateFlow<List<FileNode>> = _tree.asStateFlow()
 
+    // Ruta raíz del workspace, expuesta para el ViewModel (carpeta seleccionada por defecto)
+    val workspaceRoot: Path get() = manager.workspaceRoot
+
     // Instancias internas de I/O para evitar modificar el módulo de Koin
     private val atomicWriter = AtomicFileWriter(fs)
     private val noteIO = NoteIO(fs, atomicWriter)
@@ -89,8 +92,8 @@ class WorkspaceRepository(
         val nameError = NameSanitizer.validate(rawName)
         if (nameError != null) return Outcome.Failure(AppError.InvalidName(nameError))
         
-        val checkParent = manager.checkMutable(parent)
-        if (checkParent is Outcome.Failure) return checkParent
+        // checkMutable NO se aplica aquí: crear contenido DENTRO de workspace/ o assets/ es válido.
+        // checkMutable solo protege workspace/ y assets/ de ser renombrados, movidos o borrados.
         
         val target = parent / rawName
         val inside = manager.requireInsideWorkspace(target)
@@ -118,8 +121,8 @@ class WorkspaceRepository(
         val nameError = NameSanitizer.validate(rawName)
         if (nameError != null) return Outcome.Failure(AppError.InvalidName(nameError))
         
-        val checkParent = manager.checkMutable(parent)
-        if (checkParent is Outcome.Failure) return checkParent
+        // checkMutable NO se aplica aquí: crear contenido DENTRO de workspace/ o assets/ es válido.
+        // checkMutable solo protege workspace/ y assets/ de ser renombrados, movidos o borrados.
         
         val target = parent / "$rawName.md"
         val inside = manager.requireInsideWorkspace(target)
