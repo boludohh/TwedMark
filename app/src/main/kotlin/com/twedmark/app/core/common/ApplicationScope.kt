@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 class ApplicationScope(dispatchers: AppDispatchers) {
     val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
     
-    // Canal global para eventos de ciclo de vida del proceso
     private val _processLifecycleEvents = MutableSharedFlow<FlushReason>(extraBufferCapacity = 16)
     val processLifecycleEvents: SharedFlow<FlushReason> = _processLifecycleEvents.asSharedFlow()
     
@@ -18,12 +17,12 @@ class ApplicationScope(dispatchers: AppDispatchers) {
     }
 }
 
-// Razones de flush compartidas entre Application y ViewModels
 enum class FlushReason { 
-    Debounce,           // Autoguardado por debounce de 1s
-    Manual,             // Usuario pulsó guardar manualmente
-    AppPaused,          // Proceso entra en ON_PAUSE
-    ScreenStopped,      // Pantalla específica entra en ON_STOP
-    SwitchingFile,      // Usuario abre otro archivo
-    Closing             // Usuario cierra el documento
+    Debounce,
+    Manual,
+    AppPaused,
+    AppStopped,      // NUEVO: Proceso entra en ON_STOP
+    ScreenStopped,
+    SwitchingFile,
+    Closing
 }

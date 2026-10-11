@@ -38,26 +38,21 @@ class TwedMarkApp : Application() {
             )
         }
         
-        // Ejecutar ensureStructure en el scope de aplicación
         applicationScope.scope.launch {
             workspaceManager.ensureStructure()
         }
         
-        // Registrar observador de ciclo de vida del proceso
         ProcessLifecycleOwner.get().lifecycle.addObserver(ProcessLifecycleObserver())
     }
     
-    /**
-     * Observador del ciclo de vida del proceso completo.
-     * Emite eventos cuando la app entra en background (ON_PAUSE, ON_STOP).
-     */
     private inner class ProcessLifecycleObserver : DefaultLifecycleObserver {
         override fun onPause(owner: LifecycleOwner) {
             applicationScope.emitLifecycleEvent(FlushReason.AppPaused)
         }
         
         override fun onStop(owner: LifecycleOwner) {
-            // ON_STOP ya se maneja con AppPaused, no duplicamos
+            // Emitir AppStopped para garantizar flush antes de que la app se destruya
+            applicationScope.emitLifecycleEvent(FlushReason.AppStopped)
         }
     }
 }

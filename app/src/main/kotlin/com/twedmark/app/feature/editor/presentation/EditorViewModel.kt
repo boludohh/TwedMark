@@ -68,7 +68,6 @@ class EditorViewModel(
     private var controller: EditorController? = null
 
     init {
-        // Observar preferencias
         viewModelScope.launch {
             prefs.wordWrapFlow.collect { wrap ->
                 _uiState.update { it.copy(wordWrap = wrap) }
@@ -82,14 +81,12 @@ class EditorViewModel(
             }
         }
 
-        // Procesar eventos del ViewModel
         viewModelScope.launch {
             _events.collect { event ->
                 handleEvent(event)
             }
         }
 
-        // Debounce de 1 segundo para autoguardado
         viewModelScope.launch {
             _contentChanges
                 .debounce(1000)
@@ -99,21 +96,18 @@ class EditorViewModel(
                 }
         }
 
-        // Escuchar eventos del sistema de archivos (renombrar, mover, borrar)
         viewModelScope.launch {
             repository.events.collect { fsEvent ->
                 handleFsEvent(fsEvent)
             }
         }
         
-        // Sincronizar estado de guardado desde DocumentSaver
         viewModelScope.launch {
             documentSaver.state.collect { state ->
                 _uiState.update { it.copy(saveState = state) }
             }
         }
         
-        // Observar eventos de ciclo de vida del proceso
         viewModelScope.launch {
             applicationScope.processLifecycleEvents.collect { reason ->
                 _events.emit(EditorEvent.FlushRequested(reason))
@@ -138,9 +132,7 @@ class EditorViewModel(
     private suspend fun handleEvent(event: EditorEvent) {
         when (event) {
             is EditorEvent.OpenFile -> openFile(event.path)
-            is EditorEvent.ContentChanged -> {
-                // El estado Dirty lo maneja DocumentSaver automáticamente al llamar save()
-            }
+            is EditorEvent.ContentChanged -> {}
             is EditorEvent.SnapshotReady -> {
                 documentSaver.save(event.text)
             }
@@ -178,13 +170,16 @@ class EditorViewModel(
 
     private suspend fun openFile(path: Path) {
         val currentDoc = _uiState.value.document
-        // Si hay un documento abierto con cambios sin guardar, intentar guardar antes de cambiar
+        
+        // Guardar el documento actual si tiene cambios sin guardar
         if (currentDoc != null && _uiState.value.saveState is SaveState.Dirty) {
-            val text = controller?.currentText() ?: return
-            val result = documentSaver.save(text)
-            if (result is Outcome.Failure) {
-                _effects.send(EditorEffect.ConfirmSaveFailure(path))
-                return
+            val text = controller?.currentText()
+            if (text != null) {
+                val result = documentSaver.save(text)
+                if (result is Outcome.Failure) {
+                    _effects.send(EditorEffect.ConfirmSaveFailure(path))
+                    return
+                }
             }
         }
 
@@ -204,10 +199,13 @@ class EditorViewModel(
                     lineEnding = content.lineEnding
                 )
                 
+                // Cerrar el documento anterior y abrir el nuevo
                 documentSaver.close()
                 documentSaver.open(path, content.text, content.hadBom, content.lineEnding)
                 
+                // Cargar el texto en el editor (si el controller está listo)
                 controller?.loadText(content.text)
+                
                 _uiState.update { it.copy(document = doc, isLoading = false) }
             }
             is Outcome.Failure -> {

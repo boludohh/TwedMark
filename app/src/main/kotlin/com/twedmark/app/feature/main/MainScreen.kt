@@ -16,7 +16,6 @@ import com.twedmark.app.feature.editor.domain.SaveState
 import com.twedmark.app.feature.editor.presentation.EditorEvent
 import com.twedmark.app.feature.editor.presentation.EditorViewModel
 import com.twedmark.app.feature.editor.ui.CodeEditorView
-import com.twedmark.app.feature.explorer.presentation.ExplorerDialog
 import com.twedmark.app.feature.explorer.presentation.ExplorerEffect
 import com.twedmark.app.feature.explorer.presentation.ExplorerViewModel
 import com.twedmark.app.feature.explorer.ui.ExplorerDialogHost
@@ -40,7 +39,6 @@ fun MainScreen(
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // BackHandler: primero cierra diálogos, luego menú contextual, luego drawer, luego sale
     BackHandler(
         enabled = explorerUiState.dialog != null || 
                   explorerUiState.contextMenuNode != null || 
@@ -53,12 +51,17 @@ fun MainScreen(
         }
     }
 
-    // Flush al pasar a segundo plano (ON_STOP de la pantalla)
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) {
         editorViewModel.sendEvent(EditorEvent.FlushRequested(FlushReason.ScreenStopped))
     }
+    
+    // Flush al dispose del Composable (cuando la Activity se destruye)
+    DisposableEffect(Unit) {
+        onDispose {
+            editorViewModel.sendEvent(EditorEvent.FlushRequested(FlushReason.Closing))
+        }
+    }
 
-    // Efectos del explorador
     LaunchedEffect(Unit) {
         explorerViewModel.effects.collect { effect ->
             when (effect) {
@@ -78,7 +81,7 @@ fun MainScreen(
                 }
                 is ExplorerEffect.OpenNote -> {
                     editorViewModel.sendEvent(EditorEvent.OpenFile(effect.path))
-                    drawerState.close()
+                    scope.launch { drawerState.close() }
                     explorerViewModel.clearEffect()
                 }
                 null -> {}
@@ -222,7 +225,6 @@ fun MainScreen(
         }
     }
 
-    // Diálogos del explorador
     ExplorerDialogHost(
         dialog = explorerUiState.dialog,
         onDismiss = explorerViewModel::dismissDialog,
